@@ -1,0 +1,210 @@
+-------------------------------------------------params
+colony size = 200
+improve searches = 10
+max no change = 1
+-------------------------------------------------start
+TOTAL TIME FOR 10 SOLUTIONS =  14.43694519996643
+AVERAGE TIME FOR 100 CYCLES= 3.9769540627797446
+CYCLE COUNT= 242
+
+TOTAL TIME FOR 10 SOLUTIONS =  43.44115424156189
+AVERAGE TIME FOR 100 CYCLES= 5.412620574235916
+CYCLE COUNT= 702
+
+TOTAL TIME FOR 10 SOLUTIONS =  42.63736391067505
+AVERAGE TIME FOR 100 CYCLES= 5.631878137588501
+CYCLE COUNT= 646
+
+TOTAL TIME FOR 10 SOLUTIONS =  75.98189687728882
+AVERAGE TIME FOR 100 CYCLES= 7.491526789135403
+CYCLE COUNT= 900
+
+TOTAL TIME FOR 10 SOLUTIONS =  75.53757047653198
+AVERAGE TIME FOR 100 CYCLES= 7.22960364818573
+CYCLE COUNT= 942
+
+TOTAL TIME FOR 10 SOLUTIONS =  62.32544422149658
+AVERAGE TIME FOR 100 CYCLES= 7.144652366638184
+CYCLE COUNT= 868
+-------------------------------------------------end
+
+
+-------------------------------------------------params
+-changed bees to be more likely be become onlookers after abandoning
+
+-------------------------------------------------start
+TOTAL TIME FOR 10 SOLUTIONS =  24.2287118434906
+AVERAGE TIME FOR 100 CYCLES= 5.895311772823334
+CYCLE COUNT= 411
+
+TOTAL TIME FOR 10 SOLUTIONS =  51.029574155807495
+AVERAGE TIME FOR 100 CYCLES= 6.317694255283901
+CYCLE COUNT= 798
+
+-------------------------------------------------end
+
+-------------------------------------------------params
+-even more likely to become onlookers
+-200 bees
+-10 flips
+-max 1 no_change
+-------------------------------------------------start
+TOTAL TIME FOR 10 SOLUTIONS =  38.01897120475769
+AVERAGE TIME FOR 100 CYCLES= 6.118924657503764
+CYCLE COUNT= 619
+
+TOTAL TIME FOR 10 SOLUTIONS =  18.721150159835815
+AVERAGE TIME FOR 100 CYCLES= 6.016716957092285
+CYCLE COUNT= 294
+
+TOTAL TIME FOR 10 SOLUTIONS =  31.76299810409546
+AVERAGE TIME FOR 100 CYCLES= 6.336115002632141
+CYCLE COUNT= 495
+
+TOTAL TIME FOR 10 SOLUTIONS =  17.82713007926941
+AVERAGE TIME FOR 100 CYCLES= 5.953881621360779
+CYCLE COUNT= 300
+
+TOTAL TIME FOR 10 SOLUTIONS =  37.0823495388031
+AVERAGE TIME FOR 100 CYCLES= 6.09822142124176
+CYCLE COUNT= 607
+note: took about 17 seconds for the 10th solution, everything else was really quick
+-------------------------------------------------end
+
+-------------------------------------------------params
+-only flips 5 bits instead of 10
+-waits for 2 cycles of no_change
+
+-------------------------------------------------start
+TOTAL TIME FOR 10 SOLUTIONS =  31.852982997894287
+AVERAGE TIME FOR 100 CYCLES= 3.724702090024948
+CYCLE COUNT= 846
+
+TOTAL TIME FOR 10 SOLUTIONS =  29.600279092788696
+AVERAGE TIME FOR 100 CYCLES= 3.6370701491832733
+CYCLE COUNT= 812
+-------------------------------------------------end
+
+-------------------------------------------------params
+-multithreaded calculate_p
+-flips 50 bits instead of 5
+-waits 1 cycle of no_change
+-------------------------------------------------start
+TOTAL TIME FOR 10 SOLUTIONS =  33.56723737716675
+AVERAGE TIME FOR 100 CYCLES= 32.89021301269531
+CYCLE COUNT= 102
+
+NOTE: moved down to 20 guesses
+
+TOTAL TIME FOR 10 SOLUTIONS =  27.973305702209473
+AVERAGE TIME FOR 100 CYCLES= 13.218814849853516
+CYCLE COUNT= 189
+
+NOTE: changed cycle checker to mod 20 
+
+TOTAL TIME FOR 10 SOLUTIONS =  14.067617177963257
+AVERAGE TIME FOR 20 CYCLES= 2.6009504318237306
+CYCLE COUNT= 108
+
+TOTAL TIME FOR 10 SOLUTIONS =  33.47358560562134
+AVERAGE TIME FOR 20 CYCLES= 3.0353796005249025
+CYCLE COUNT= 219
+-------------------------------------------------end
+
+-------------------------------------------------params
+-400 bees
+-20 guesses
+-------------------------------------------------start
+TOTAL TIME FOR 10 SOLUTIONS =  16.09302306175232
+AVERAGE TIME FOR 20 CYCLES= 5.263399600982666
+CYCLE COUNT= 58
+
+TOTAL TIME FOR 10 SOLUTIONS =  25.822315216064453
+AVERAGE TIME FOR 20 CYCLES= 6.505226453145345
+CYCLE COUNT= 78
+
+TOTAL TIME FOR 10 SOLUTIONS =  33.22654891014099
+AVERAGE TIME FOR 20 CYCLES= 6.508093404769897
+CYCLE COUNT= 102
+-------------------------------------------------end
+
+-------------------------------------------------params
+30 solutions
+-------------------------------------------------start
+TOTAL TIME FOR 30 SOLUTIONS =  74.43836259841919
+AVERAGE TIME FOR 20 CYCLES= 6.023678084214528
+CYCLE COUNT= 247
+
+TOTAL TIME FOR 30 SOLUTIONS =  89.7362105846405
+AVERAGE TIME FOR 20 CYCLES= 5.779820744196574
+CYCLE COUNT= 310
+-------------------------------------------------end
+
+
+-------------------------------------------------params
+-10 solns
+-even more bees (800)
+-very few bit flips
+-------------------------------------------------start
+TOTAL TIME FOR 10 SOLUTIONS =  91.22450733184814
+AVERAGE TIME FOR 20 CYCLES= 4.635366113562333
+CYCLE COUNT= 391
+
+TOTAL TIME FOR 10 SOLUTIONS =  114.90495276451111
+AVERAGE TIME FOR 20 CYCLES= 17.107465823491413
+CYCLE COUNT= 133
+-------------------------------------------------end
+
+
+-------------------------------------------------params
+-600 bees
+-20 bit flips
+-------------------------------------------------start
+TOTAL TIME FOR 10 SOLUTIONS =  37.17292094230652
+AVERAGE TIME FOR 20 CYCLES= 17.76634180545807
+CYCLE COUNT= 42
+
+TOTAL TIME FOR 10 SOLUTIONS =  67.0399227142334
+AVERAGE TIME FOR 20 CYCLES= 18.789096037546795
+CYCLE COUNT= 72
+
+NOTE: added stdev
+
+TOTAL TIME FOR 10 SOLUTIONS =  56.728471755981445
+AVERAGE TIME FOR 20 CYCLES= 17.908851544062298
+CYCLE COUNT= 63
+STD DEV in solution times= 5.397625518356524
+-------------------------------------------------end
+
+
+-------------------------------------------------params
+-400 bees
+-20 bit flips
+-------------------------------------------------start
+TOTAL TIME FOR 10 SOLUTIONS =  40.43990612030029
+AVERAGE TIME FOR 20 CYCLES= 11.645762920379639
+CYCLE COUNT= 70
+STD DEV in solution times= 3.2843147730311464
+
+TOTAL TIME FOR 10 SOLUTIONS =  54.81121253967285
+AVERAGE TIME FOR 20 CYCLES= 11.857432842254639
+CYCLE COUNT= 92
+STD DEV in solution times= 6.684799010566568
+
+TOTAL TIME FOR 10 SOLUTIONS =  45.42522311210632
+AVERAGE TIME FOR 20 CYCLES= 11.242721716562906
+CYCLE COUNT= 80
+STD DEV in solution times= 3.141071310919651
+-------------------------------------------------end
+
+-------------------------------------------------params
+Running the best set so far
+-200 bees
+-10 bit flips
+-------------------------------------------------start
+TOTAL TIME FOR 10 SOLUTIONS =  50.023207664489746
+AVERAGE TIME FOR 20 CYCLES= 4.298801877281883
+CYCLE COUNT= 233
+STD DEV in solution times= 3.5977506005848214
+
+-------------------------------------------------end
