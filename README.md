@@ -1,4 +1,5 @@
-#python-bees
+python-bees
+---
 
 An implementation of the Artifical Bee Colony algorithm originally proposed by Karaboga
 
