@@ -26,7 +26,7 @@ def hdist(bits1,bits2):
 		if(bits1[a] != bits2[a]): 
 			count+=1
 			differing.append(a)
-
+	assert(len(differing) == count)
 	return count, differing
 
 def step_automata(state):
@@ -92,12 +92,16 @@ class Bee:
 				best_p = self.p
 				print("new_best = ",self.p, "cycle count = ",cycles)
 
-			self.improve_source()
-			colony.return_vals.put((self.p, True,False,self))
+			is_still_emp = self.improve_source()
+			colony.return_vals.put((self.p, is_still_emp,False,self))
 			return
 
 	def improve_source(self):
 		hdist_last, differing = hdist(step_automata(self.source),goal_bits)
+
+		if hdist_last == 0:
+			return True
+
 		if hdist_last > 1:
 			#Flip a few random bits 
 			old = self.source
@@ -116,20 +120,46 @@ class Bee:
 				if hdist_new < hdist_last:
 					self.source = new
 					hdist_last = hdist_new
+					self.no_change = 0
 					#print("better")
+
+			# if old == self.source:
+			# 	self.no_change+=1
+
+			# 	if self.no_change >=3:
+			# 		self.change()
+			# 		return False
+
+			return True
 		else:
 			#identify the differing bit
 			#try to manually do it?	brute force?
 			#print("hi I'm tryin ma best")		
 
-			new = self.source
-			r = random.randint(0,len(new)-1)
-			if new[r] == "0":
-				new = new[:r] +  "1" + new[r+1:]
-			else:
-				new = new[:r] +  "0" + new[r+1:]
+			diff = differing[0]
 
-			self.source = new	
+			new = self.source
+			if goal_bits[diff] == 0:
+				new = new[:diff-1] + "000" + new[diff+2:]
+
+				is_soln = step_automata(new) == goal_bits
+
+				if not is_soln:
+					new = new[:diff-1] + "111" + new[diff+2:]
+
+				#assert(hdist(self.source,new) == 3)
+
+				self.source = new
+			else:
+				pick = ["001","100","010","110","011","101"]
+
+				#currently failing edge cases
+				self.source = new[:diff-1] + pick[random.randint(0,5)] + new[diff+2:]
+
+			#self.change()
+			#return False
+			return True
+
 
 
 	def help(self):
