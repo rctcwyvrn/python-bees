@@ -1,4 +1,4 @@
-import random, time
+import random, time,sys
 import queue as q
 import numpy as np
 import matplotlib.pyplot as plt
@@ -40,24 +40,27 @@ def step_automata(state):
 	return next_state
 
 class Bee:
-	def __init__(self,id):
+	def __init__(self):
 		self.type = ""
 		self.source = None
-		self.id = id
 		self.p = 0
 		self.no_change = 0
+		self.helped = True
+		self.num_helped =0
 
 	def print(self):
 		print(self.type,self.source)
 
 	def change(self):
 		self.source = None
-		if random.randint(0,2) == 2:
-			self.type = "SCT"
-			#print("Abandoning to scout")
-		else:
-			self.type = "ONL"
-			#print("Abandoning to observe")
+		self.type = "SCT"
+
+		# if random.randint(0,3) == 0:
+		# 	self.type = "ONL"
+		# 	#print("Abandoning to scout")
+		# else:
+		# 	self.type = "SCT"
+		# 	#print("Abandoning to observe")
 	def calculate_p(self,colony):
 		step = step_automata(self.source)
 		hdist_val = hdist(step,goal_bits)
@@ -72,12 +75,20 @@ class Bee:
 			self.change()
 			colony.return_vals.put((0, False, False,self))
 			return
+
+		elif not self.helped:
+			self.change()
+			colony.return_vals.put((0, False, False,self))
+			return
 		else:
-			self.p = 1/(hdist_val ** 3)
+			#print("\n was helped last cycle by ",self.num_helped, "my p=",self.p)
+			self.helped = False
+			self.num_helped = 0
+			self.p = 1/(hdist_val ** 2)
 
 			if self.p > best_p:
 				best_p = self.p
-				#print("new_best = ",self.p, "cycle count = ",cycles)
+				print("new_best = ",self.p, "cycle count = ",cycles)
 
 			is_still_emp = self.improve_source()
 			colony.return_vals.put((self.p, is_still_emp,False,self))
@@ -87,75 +98,69 @@ class Bee:
 		hdist_last = hdist(step_automata(self.source),goal_bits)
 		#Flip a few random bits 
 		old = self.source
-		for _ in range(20):
+		for i in range(bit_len):
 			new = self.source
-			r = random.randint(0,len(new)-1)
+			r = i
+			#r = random.randint(0,len(new)-1)
 			if new[r] == "0":
 				new = new[:r] +  "1" + new[r+1:]
 			else:
 				new = new[:r] +  "0" + new[r+1:]
 
-			assert(hdist(self.source,new) == 1)
+			#assert(hdist(self.source,new) == 1)
 
 			hdist_new = hdist(step_automata(new),goal_bits) 
 			if hdist_new < hdist_last:
 				self.source = new
 				hdist_last = hdist_new
 
-		if self.source == old:
-			self.no_change +=1
-			if self.no_change >=1:
-				self.change()
-				return False
-		else:		
-			self.no_change = 0
-		
 		return True
 
-COLONY_SIZE = 200			
+	def help(self):
+		self.num_helped +=1
+		if self.num_helped>=1 and not self.helped:
+			self.helped = True
+		self.improve_source()
+
+
+COLONY_SIZE = 400			
 class Colony:
 	def __init__(self):
-		self.new_emp = 0
-		self.new_sct = 0
-		self.new_onl = 0
 
 		sources = [random.randint(0,2**bit_len-1) for _ in range(COLONY_SIZE)]
 		self.emp_bees = q.Queue()
 		self.sct_bees = q.Queue()
-		self.onl_bees = q.Queue()
+		self.num_onl = 0
 		self.solutions = []
 
 		for i in range(COLONY_SIZE):
-			new_bee = Bee(i)
-			if i<COLONY_SIZE-50:
+			new_bee = Bee()
+			if i<COLONY_SIZE/2:
 				bee_type = "EMP"
 				src = "{0:b}".format(sources[i])
 				new_bee.source = "0"*(bit_len-len(src)) + src
 				new_bee.type = bee_type
 				self.emp_bees.put(new_bee)
-			elif i<COLONY_SIZE-10:
-				bee_type = "ONL"
-				new_bee.type = bee_type
-				self.onl_bees.put(new_bee)
+			elif i<COLONY_SIZE-1:
+				self.num_onl+=1
 			else:
 				bee_type = "SCT"
 				new_bee.type = bee_type
 				self.sct_bees.put(new_bee)
 
 	def print_bees(self):
-		print("new #'s: new_emp = ",self.new_emp,"new_sct = ",self.new_sct, "new_onl = ",self.new_onl, "total=",self.new_emp+self.new_sct+self.new_onl)
+		print("# EMP=",self.emp_bees.qsize()-self.scouted, "#ONL=",self.num_onl, "#SCT=",self.scouted, "TOTAL =",self.emp_bees.qsize()+self.num_onl)
+		print("Kept job=",self.kept_emp, "Converted from onl to emp=",self.emp_bees.qsize()-self.kept_emp-self.scouted)
 
 	def cycle(self):
-		self.new_emp = 0
-		self.new_sct = 0
-		self.new_onl = 0
 		#Each worker attempts to impove the soltuion and calculates a p for itself
 		prob_raw = []
 		prob_bees = []
 		new_emp_bees = q.Queue()
 
-		#delta = 0
+		delta = 0
 		threads = []
+		self.kept_emp = 0
 
 		self.return_vals = q.Queue()
 		while not self.emp_bees.empty():
@@ -176,15 +181,13 @@ class Colony:
 					prob_raw.append(p)
 					prob_bees.append(bee)
 					new_emp_bees.put(bee)
-					self.new_emp+=1
+					self.kept_emp +=1
 				else:
-					#delta+=1
+					delta+=1
 					if bee.type == "SCT":
 						self.sct_bees.put(bee)
-						self.new_sct+=1
 					elif bee.type == "ONL":
-						self.onl_bees.put(bee)
-						self.new_onl+=1
+						self.num_onl+=1
 					else:
 						bee.print()
 						assert(False)
@@ -204,8 +207,8 @@ class Colony:
 				bee.source = None
 				bee.type = "SCT"
 				self.sct_bees.put(bee)
-				self.new_sct+=1
-			#print("delta = ",delta)
+
+			#print("delta = ",delta/COLONY_SIZE)
 
 		total = sum(prob_raw)
 		prob = [p/total for p in prob_raw] #normalizes the probabilities
@@ -214,29 +217,34 @@ class Colony:
 		if len(prob_raw) > 0:
 			assert(round(sum(prob)) == 1)
 
-			#employ all onlooker bees
-			while not self.onl_bees.empty():
-				bee = self.onl_bees.get()
+			#tell all onlooker bees to help
+			for i in range(self.num_onl):
 				choice = np.random.choice([i for i in range(len(prob))], p=prob)
-				new_source = prob_bees[choice].source
-				bee.source = new_source
-				bee.type = "EMP"
-				new_emp_bees.put(bee)
-				#self.new_emp+=1
+				selected_bee = prob_bees[choice]
+				selected_bee.help()
+
+
+				# if random.randint(0,100) == 0:
+				# 	bee = Bee()
+				# 	bee.source = selected_bee.source
+				# 	bee.type = "EMP"
+				# 	new_emp_bees.put(bee)
+				# 	self.num_onl-=1
 
 		#give random sources to all scout bees
+		self.scouted = 0
 		while not self.sct_bees.empty():
 			bee = self.sct_bees.get()
-			src = "{0:b}".format(random.randint(0,bit_len))
+			src = "{0:b}".format(random.randint(0,(2**bit_len-1)))
 			bee.source = "0"*(bit_len-len(src)) + src
 			bee.type = "EMP"
 			new_emp_bees.put(bee)
-			#self.new_emp+=1
+			self.scouted+=1
 
 		self.emp_bees = new_emp_bees
 
 		#assert that we haven't lost any bees
-		if not (self.emp_bees.qsize() + self.onl_bees.qsize() + self.sct_bees.qsize() == COLONY_SIZE):
+		if not (self.emp_bees.qsize() + self.num_onl + self.sct_bees.qsize() == COLONY_SIZE):
 			self.print_bees()
 			assert(False)
 
@@ -285,12 +293,13 @@ def activate_colony(c):
 	while len(c.solutions) < desired_num_solns:#change this to < when the stuff is coded proper
 		if cycles % 20 == 0 and cycles>0:
 			c.print_bees()
-			print("number of solutions found = ",len(c.solutions))
 			toc = time.time()
 			cycle_times.append(toc-tec)
+			print("number of solutions found = ",len(c.solutions), "cycle time=",toc-tec,"current p = ",best_p,"\n")
 			tec = toc
 		c.cycle()
 		cycles+=1
+		#break
 
 #Sources are possible solutions
 #Nectar is how good the given solution is 
