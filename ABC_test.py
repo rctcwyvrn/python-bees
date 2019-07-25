@@ -21,11 +21,13 @@ def hdist(bits1,bits2):
 	#print(len(bits1),len(bits2))
 	assert(len(bits1) == len(bits2))
 	count=0
+	differing = []
 	for a in range(len(bits1)):
 		if(bits1[a] != bits2[a]): 
 			count+=1
+			differing.append(a)
 
-	return count
+	return count, differing
 
 def step_automata(state):
 	next_state = ""
@@ -63,7 +65,7 @@ class Bee:
 		# 	#print("Abandoning to observe")
 	def calculate_p(self,colony):
 		step = step_automata(self.source)
-		hdist_val = hdist(step,goal_bits)
+		hdist_val,_ = hdist(step,goal_bits)
 		global best_p
 
 		if hdist_val == 0:
@@ -90,31 +92,45 @@ class Bee:
 				best_p = self.p
 				print("new_best = ",self.p, "cycle count = ",cycles)
 
-			is_still_emp = self.improve_source()
-			colony.return_vals.put((self.p, is_still_emp,False,self))
+			self.improve_source()
+			colony.return_vals.put((self.p, True,False,self))
 			return
 
 	def improve_source(self):
-		hdist_last = hdist(step_automata(self.source),goal_bits)
-		#Flip a few random bits 
-		old = self.source
-		for i in range(bit_len):
+		hdist_last, differing = hdist(step_automata(self.source),goal_bits)
+		if hdist_last > 1:
+			#Flip a few random bits 
+			old = self.source
+			for i in range(bit_len):
+				new = self.source
+				r = i
+				#r = random.randint(0,len(new)-1)
+				if new[r] == "0":
+					new = new[:r] +  "1" + new[r+1:]
+				else:
+					new = new[:r] +  "0" + new[r+1:]
+
+				#assert(hdist(self.source,new) == 1)
+
+				hdist_new,_ = hdist(step_automata(new),goal_bits) 
+				if hdist_new < hdist_last:
+					self.source = new
+					hdist_last = hdist_new
+					#print("better")
+		else:
+			#identify the differing bit
+			#try to manually do it?	brute force?
+			#print("hi I'm tryin ma best")		
+
 			new = self.source
-			r = i
-			#r = random.randint(0,len(new)-1)
+			r = random.randint(0,len(new)-1)
 			if new[r] == "0":
 				new = new[:r] +  "1" + new[r+1:]
 			else:
 				new = new[:r] +  "0" + new[r+1:]
 
-			#assert(hdist(self.source,new) == 1)
+			self.source = new	
 
-			hdist_new = hdist(step_automata(new),goal_bits) 
-			if hdist_new < hdist_last:
-				self.source = new
-				hdist_last = hdist_new
-
-		return True
 
 	def help(self):
 		self.num_helped +=1
