@@ -1,4 +1,4 @@
-import random, time,sys
+import random, time,os,codecs
 import queue as q
 import numpy as np
 import matplotlib.pyplot as plt
@@ -41,14 +41,22 @@ def step_automata(state):
 			next_state+="1"
 	return next_state
 
+def flip(val, r):
+	if val[r] == "0":
+		val = val[:r] +  "1" + val[r+1:]
+	else:
+		val = val[:r] +  "0" + val[r+1:]
+	return val
+
+
 class Bee:
 	def __init__(self):
 		self.type = ""
 		self.source = None
 		self.p = 0
-		self.no_change = 0
 		self.helped = True
 		self.num_helped =0
+		self.flip_two = False
 
 	def print(self):
 		print(self.type,self.source)
@@ -90,7 +98,7 @@ class Bee:
 
 			if self.p > best_p:
 				best_p = self.p
-				print("new_best = ",self.p, "cycle count = ",cycles)
+				#print("new_best = ",self.p, "cycle count = ",cycles)
 
 			is_still_emp = self.improve_source()
 			colony.return_vals.put((self.p, is_still_emp,False,self))
@@ -107,28 +115,32 @@ class Bee:
 			old = self.source
 			for i in range(bit_len):
 				new = self.source
-				r = i
-				#r = random.randint(0,len(new)-1)
-				if new[r] == "0":
-					new = new[:r] +  "1" + new[r+1:]
-				else:
-					new = new[:r] +  "0" + new[r+1:]
+				new = flip(new,i)
 
 				#assert(hdist(self.source,new) == 1)
+				if self.flip_two:
+					r = random.randint(0,len(new)-1)
+					new = flip(new,r)
 
 				hdist_new,_ = hdist(step_automata(new),goal_bits) 
-				if hdist_new < hdist_last:
+				if hdist_new <= hdist_last:
+				#if hdist_new < hdist_last: FUNNY THING, THIS LINE RUNS WAY WAY WORSE THAN THE ABOVE ONE
 					self.source = new
 					hdist_last = hdist_new
-					self.no_change = 0
+
+				#if hdist_new < hdist_last:
+					#self.flip_two = False
+					#self.no_change = 0
 					#print("better")
 
-			# if old == self.source:
-			# 	self.no_change+=1
+			if old == self.source:
+				if self.flip_two:
+					self.change()
+					return False
+				else:
+					self.flip_two = True
 
-			# 	if self.no_change >=3:
-			# 		self.change()
-			# 		return False
+				#self.no_change+=1 #only gets incremented if source is not improved despite flipping all bits
 
 			return True
 		else:
@@ -138,23 +150,32 @@ class Bee:
 
 			diff = differing[0]
 
-			new = self.source
+			new = list(self.source)
 			if goal_bits[diff] == 0:
-				new = new[:diff-1] + "000" + new[diff+2:]
+				new[(diff-1) % bit_len] = "0"
+				new[(diff) % bit_len] = "0"
+				new[(diff) % bit_len] = "0"
 
 				is_soln = step_automata(new) == goal_bits
 
 				if not is_soln:
-					new = new[:diff-1] + "111" + new[diff+2:]
+					new[(diff-1) % bit_len] = "1"
+					new[(diff) % bit_len] = "1"
+					new[(diff) % bit_len] = "1"
 
 				#assert(hdist(self.source,new) == 3)
 
-				self.source = new
+				self.source = "".join(new)
 			else:
 				pick = ["001","100","010","110","011","101"]
+				choice = pick[random.randint(0,5)]
 
 				#currently failing edge cases
-				self.source = new[:diff-1] + pick[random.randint(0,5)] + new[diff+2:]
+				new[(diff-1) % bit_len] = choice[0]
+				new[(diff) % bit_len] = choice[1]
+				new[(diff) % bit_len] = choice[2]
+
+				self.source = "".join(new)
 
 			#self.change()
 			#return False
@@ -169,7 +190,7 @@ class Bee:
 		self.improve_source()
 
 
-COLONY_SIZE = 400			
+COLONY_SIZE = 600			
 class Colony:
 	def __init__(self):
 
@@ -247,7 +268,7 @@ class Colony:
 					y.append(now-start)
 					start = now
 
-					print("solution!! Cycle # = ",cycles)
+					#print("solution!! Cycle # = ",cycles)
 					self.solutions.append(bee.source)
 
 				bee.source = None
@@ -283,6 +304,7 @@ class Colony:
 			bee = self.sct_bees.get()
 			src = "{0:b}".format(random.randint(0,(2**bit_len-1)))
 			bee.source = "0"*(bit_len-len(src)) + src
+			#print(bee.source)
 			bee.type = "EMP"
 			new_emp_bees.put(bee)
 			self.scouted+=1
@@ -315,21 +337,29 @@ class Colony:
 # print("nodes",[node.name for node in graph_nodes])
 # print("edges",[(edge.x,edge.y, edge.weight) for edge in graph_edges])
 
-goal = "66de3c1bf87fdfcf"
-goal_bits = "{0:b}".format(int(goal,16))
-print("goal=",goal_bits)
+RANDOM_GOAL = True
+
+if RANDOM_GOAL:
+	x = codecs.encode(os.urandom(8),'hex')
+	x = x.decode('ascii')
+	goal_bits = step_automata("{0:b}".format(int(x,16)))
+else:
+	goal = "66de3c1bf87fdfcf"
+	goal_bits = "{0:b}".format(int(goal,16))
 bit_len = len(goal_bits)
+print("goal=",goal_bits, "len=",bit_len)
 best_p = 0
 c = Colony()
 
 
 
-desired_num_solns = 10
+desired_num_solns = 100
 start = time.time()
 tic = start
 y = []
 cycles = 0
 cycle_times = []
+cycle_mod = 10
 
 def activate_colony(c):
 	#c.cycle()
@@ -337,7 +367,7 @@ def activate_colony(c):
 	global cycles
 	tec = time.time()
 	while len(c.solutions) < desired_num_solns:#change this to < when the stuff is coded proper
-		if cycles % 20 == 0 and cycles>0:
+		if cycles % cycle_mod == 0 and cycles>0:
 			c.print_bees()
 			toc = time.time()
 			cycle_times.append(toc-tec)
@@ -351,11 +381,11 @@ def activate_colony(c):
 #Nectar is how good the given solution is 
 activate_colony(c)
 
-print("TOTAL TIME FOR", desired_num_solns, "SOLUTIONS = ",time.time()-tic)
+print("TOTAL TIME FOR", desired_num_solns, "SOLUTIONS = ",time.time()-tic, "FOR RANDOM_GOAL=",RANDOM_GOAL)
 if len(cycle_times)>0:
-	print("AVERAGE TIME FOR 20 CYCLES=", sum(cycle_times)/len(cycle_times))
+	print("AVERAGE TIME FOR", cycle_mod,"CYCLES=", sum(cycle_times)/len(cycle_times))
 else:
-	print("LESS THAN 20 CYCLES TAKEN")
+	print("LESS THAN", cycle_mod,"CYCLES TAKEN")
 print("CYCLE COUNT=",cycles)
 print("STD DEV in solution times=",np.std(y))
 
@@ -364,7 +394,8 @@ plt.xlabel("Solution #")
 plt.ylabel("Time in seconds to find solution #")
 plt.show()
 
-plt.plot(cycle_times)
+x = [cycle_mod*i for i in range(len(cycle_times))]
+plt.plot(x,cycle_times)
 plt.xlabel("Cycle #")
 plt.ylabel("Time in seconds")
 plt.show()
