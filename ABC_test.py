@@ -177,6 +177,8 @@ class Bee:
 
 				self.source = "".join(new)
 
+				#self.source = flip(self.source,diff)
+
 			#self.change()
 			#return False
 			return True
