@@ -13,17 +13,16 @@ Another big problem is that this application is not what this sort of meta-heuri
 Results
 ---
 
-*Good runs*
+*Good runs*  
+TOTAL TIME FOR 100 SOLUTIONS =  4.619204521179199 FOR RANDOM_GOAL= True  
+AVERAGE TIME FOR 10 CYCLES= 3.7850918769836426  
+CYCLE COUNT= 15  
+STD DEV in solution times= 0.21309670614425877  
 
-TOTAL TIME FOR 100 SOLUTIONS =  4.619204521179199 FOR RANDOM_GOAL= True
-AVERAGE TIME FOR 10 CYCLES= 3.7850918769836426
-CYCLE COUNT= 15
-STD DEV in solution times= 0.21309670614425877
+TOTAL TIME FOR 100 SOLUTIONS =  5.018507242202759 FOR RANDOM_GOAL= True  
+AVERAGE TIME FOR 10 CYCLES= 4.860507488250732  
+CYCLE COUNT= 11  
+STD DEV in solution times= 0.27361129124608474  
 
-TOTAL TIME FOR 100 SOLUTIONS =  5.018507242202759 FOR RANDOM_GOAL= True
-AVERAGE TIME FOR 10 CYCLES= 4.860507488250732
-CYCLE COUNT= 11
-STD DEV in solution times= 0.27361129124608474
-
-*Bad runs*
-They never finish because they get stuck at solutions with a hamming distance of 2, and flipping bits isn't enough to fix it.
+*Bad runs*  
+They never finish because they get stuck at solutions with a hamming distance of 2, and flipping bits isn't enough to fix it.  
