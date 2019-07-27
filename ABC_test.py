@@ -1,8 +1,9 @@
-import random, time,os,codecs
+import random, time,os,codecs,sys
 import queue as q
 import numpy as np
 import matplotlib.pyplot as plt
 import threading
+import subprocess
 
 # class Node: #"nectar sources"
 # 	def __init__(self,name):
@@ -194,13 +195,13 @@ class Bee:
 
 COLONY_SIZE = 600			
 class Colony:
-	def __init__(self):
+	def __init__(self, solutions_found):
 
 		sources = [random.randint(0,2**bit_len-1) for _ in range(COLONY_SIZE)]
 		self.emp_bees = q.Queue()
 		self.sct_bees = q.Queue()
 		self.num_onl = 0
-		self.solutions = []
+		self.solutions = solutions_found
 
 		for i in range(COLONY_SIZE):
 			new_bee = Bee()
@@ -273,6 +274,11 @@ class Colony:
 					#print("solution!! Cycle # = ",cycles)
 					self.solutions.append(bee.source)
 
+					#JUST FOR FUNSIES
+					res = flag(bee.source)
+					if res:
+						sys.exit(1)
+
 				bee.source = None
 				bee.type = "SCT"
 				self.sct_bees.put(bee)
@@ -339,7 +345,7 @@ class Colony:
 # print("nodes",[node.name for node in graph_nodes])
 # print("edges",[(edge.x,edge.y, edge.weight) for edge in graph_edges])
 
-RANDOM_GOAL = True
+RANDOM_GOAL = False
 
 if RANDOM_GOAL:
 	x = codecs.encode(os.urandom(8),'hex')
@@ -347,15 +353,15 @@ if RANDOM_GOAL:
 	goal_bits = step_automata("{0:b}".format(int(x,16)))
 else:
 	goal = "66de3c1bf87fdfcf"
-	goal_bits = "{0:b}".format(int(goal,16))
+	goal_bits = "0"+"{0:b}".format(int(goal,16))
 bit_len = len(goal_bits)
 print("goal=",goal_bits, "len=",bit_len)
 best_p = 0
-c = Colony()
+c = Colony([])
 
 
 
-desired_num_solns = 100
+desired_num_solns = 10000
 start = time.time()
 tic = start
 y = []
@@ -363,9 +369,30 @@ cycles = 0
 cycle_times = []
 cycle_mod = 10
 
+def flag(to_test):
+	flag = "U2FsdGVkX18+Wl0awCH/gWgLGZC4NiCkrlpesuuX8E70tX8t/TAarSEHTnpY/C1D"
+	as_int = int(to_test,2)
+	hex_in = hex(as_int)
+	res = subprocess.call(["./automata_dec.sh",hex_in])
+	out = open("std_err.txt")
+	a = out.readline()
+	if a != "bad decrypt\n":
+		#print("Maybe a flag?")
+		try:	
+			out = open("std_out.txt")
+			print(out.readlines())
+			return True
+		except UnicodeDecodeError:
+			#print("ignore")
+			return False
+			#pass
+	return False
+
 def activate_colony(c):
 	#c.cycle()
 	print("-"*20+"START"+"-"*20)
+	last_p = 0
+	last_soln_count = 0
 	global cycles
 	tec = time.time()
 	while len(c.solutions) < desired_num_solns:#change this to < when the stuff is coded proper
@@ -374,6 +401,13 @@ def activate_colony(c):
 			toc = time.time()
 			cycle_times.append(toc-tec)
 			print("number of solutions found = ",len(c.solutions), "cycle time=",toc-tec,"current p = ",best_p,"\n")
+			# if best_p == last_p and last_soln_count == len(c.solutions):
+			# 	c = Colony(c.solutions)
+			# 	print("resetting colony")
+			# else:
+			# 	last_p = best_p
+			# 	last_soln_count = len(c.solutions)
+			c = Colony(c.solutions) #Force reset every 10 cycles since each colony manages to find all the solutions it's ever going to find within 10 cycles
 			tec = toc
 		c.cycle()
 		cycles+=1
@@ -401,3 +435,28 @@ plt.plot(x,cycle_times)
 plt.xlabel("Cycle #")
 plt.ylabel("Time in seconds")
 plt.show()
+
+
+# valid = c.solutions
+
+# c = 0
+# maybe_flag = []
+# #subprocess.call(args, *, stdin=None, stdout=None, stderr=None, shell=False)
+# for to_test in valid:
+# #to_test = valid[0]
+# 	flag = "U2FsdGVkX18+Wl0awCH/gWgLGZC4NiCkrlpesuuX8E70tX8t/TAarSEHTnpY/C1D"
+# 	as_int = int(to_test,2)
+# 	hex_in = hex(as_int)
+# 	res = subprocess.call(["./automata_dec.sh",hex_in])
+# 	out = open("std_err.txt")
+# 	a = out.readline()
+# 	if a != "bad decrypt\n":
+# 		print("Maybe a flag?",a,c)
+# 		maybe_flag.append(c)
+# 		try:	
+# 			out = open("std_out.txt")
+# 			print(out.readlines())
+# 		except UnicodeDecodeError:
+# 			print("ignore")
+# 			#pass
+# 	c+=1

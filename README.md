@@ -10,6 +10,13 @@ I believe the current main problem is not with the bees, but rather because hamm
 
 Another big problem is that this application is not what this sort of meta-heuristic is usually used for. Reversing cellular automata requires finding all 10k ish possible steps, while the ABC algorithm is very good at finding one solution out of a large amount.
 
+This program is also the least efficient way of solving one of the cryptography challenges from googlectf 2019. 
+
+*# EMP= 5 #ONL= 299 #SCT= 296 TOTAL = 600*
+*Kept job= 5 Converted from onl to emp= 0*
+*number of solutions found =  4242 cycle time= 6.870338678359985 current p =  1.0*
+*['CTF{reversing_cellular_automatas_can_be_done_bit_by_bit}\n']*
+
 Results
 ---
 
@@ -26,3 +33,9 @@ STD DEV in solution times= 0.27361129124608474
 
 *Bad runs*  
 They never finish because they get stuck at solutions with a hamming distance of 2, and flipping bits isn't enough to fix it.  
+
+*Long runs*
+TOTAL TIME FOR 1000 SOLUTIONS =  290.1216013431549 FOR RANDOM_GOAL= False
+AVERAGE TIME FOR 10 CYCLES= 7.614443427638004
+CYCLE COUNT= 382
+STD DEV in solution times= 1.985845382176584
