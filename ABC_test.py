@@ -274,10 +274,12 @@ class Colony:
 					#print("solution!! Cycle # = ",cycles)
 					self.solutions.append(bee.source)
 
-					#JUST FOR FUNSIES
-					res = flag(bee.source)
-					if res:
-						sys.exit(1)
+					if not RANDOM_GOAL:
+						#JUST FOR FUNSIES
+						res = flag(bee.source)
+						if res:
+							print("FLAG FOUND")
+							sys.exit(1)
 
 				bee.source = None
 				bee.type = "SCT"
