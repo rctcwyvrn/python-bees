@@ -347,7 +347,7 @@ class Colony:
 # print("nodes",[node.name for node in graph_nodes])
 # print("edges",[(edge.x,edge.y, edge.weight) for edge in graph_edges])
 
-RANDOM_GOAL = False
+RANDOM_GOAL = True
 
 if RANDOM_GOAL:
 	x = codecs.encode(os.urandom(8),'hex')
@@ -363,7 +363,7 @@ c = Colony([])
 
 
 
-desired_num_solns = 10000
+desired_num_solns = 1000
 start = time.time()
 tic = start
 y = []
